@@ -13,7 +13,9 @@ jobs:
         strategy:
             matrix:
                 dependencies:
+                    - "highest"
                     - "locked"
+                    - "lowest"
                 php-version:
                     - "7.0"
                     - "7.1"
@@ -21,8 +23,24 @@ jobs:
                     - "7.3"
                     - "7.4"
                     - "8.0"
+                    - "8.1"
+                    - "8.2"
+                    - "8.3"
                 operating-system:
                     - "ubuntu-latest"
+                include:
+                    - php-version: "7.0"
+                      phpunit-version: "6.0||^7.0||^8.0"
+                    - php-version: "7.1"
+                      phpunit-version: "6.0||^7.0||^8.0"
+                    - php-version: "7.2"
+                      phpunit-version: "6.0||^7.0||^8.0"
+                    - php-version: "8.1"
+                      phpunit-version: "^9.0"
+                    - php-version: "8.2"
+                      phpunit-version: "^9.0"
+                    - php-version: "8.3"
+                      phpunit-version: "^9.0"
 
         steps:
             - name: "Checkout"
@@ -45,6 +63,10 @@ jobs:
                       vendor
                   key: "php-${{ matrix.php-version }}-${{ matrix.dependencies }}"
                   restore-keys: "php-${{ matrix.php-version }}-${{ matrix.dependencies }}"
+
+            - name: "Adjust phpunit version"
+              if: ${{ matrix.phpunit-version }}
+              run: "composer require --no-interaction --no-progress --no-suggest --no-update --dev phpunit/phpunit:${{ matrix.phpunit-version }}"
 
             - name: "Install lowest dependencies"
               if: ${{ matrix.dependencies == 'lowest' }}
